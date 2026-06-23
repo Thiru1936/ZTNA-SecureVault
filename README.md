@@ -11,7 +11,7 @@ A Zero Trust Network Access (ZTNA) based secure file storage system that continu
 - ✅ User Behavior Monitoring
 - ✅ Device Usage Tracking
 - ✅ Unauthorized Access Detection
-- ✅ Machine Learning Risk Prediction
+- ✅ Behavioral Anomaly Detection using Machine Learning
 - ✅ Admin Dashboard
 
 
@@ -68,8 +68,7 @@ ZTNA-SecureVault/
 
 ## 🎯 Objective
 
-To implement a Zero Trust based secure file storage system that continuously monitors user activities and identifies suspicious behavior using Machine Learning.
-
+To develop a Zero Trust Network Access (ZTNA) based secure file storage system that continuously monitors user behavior, analyzes activity patterns using Machine Learning, and assists in detecting potential insider threats.
 
 ## 🚀 Future Enhancements
 
