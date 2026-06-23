@@ -60,4 +60,3 @@ To implement a Zero Trust based secure file storage system that continuously mon
 ## 👨‍💻 Author
 
 **Thirupathi Balaji S**
-Final Year B.E CSE Student
