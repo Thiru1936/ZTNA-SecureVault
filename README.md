@@ -39,18 +39,20 @@ A Zero Trust Network Access (ZTNA) based secure file vault that monitors user be
 (Add image)
 
 
-## 📂 Project Structure
+## 📁 Project Structure
 
+```text
 ZTNA-SecureVault/
+│── app.py
+│── train_model.py
+│── dataset.csv
+│── requirements.txt
+│── README.md
 │
 ├── static/
-├── templates/
-├── app.py
-├── train_model.py
-├── dataset.csv
-├── requirements.txt
-└── README.md
-
+│
+└── templates/
+```
 
 ## 🎯 Objective
 
