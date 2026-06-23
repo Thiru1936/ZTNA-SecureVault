@@ -1,6 +1,6 @@
-# 🔐 ZTNA Secure Vault
+# 🔐 ZTNA Secure Vault – Zero Trust File Storage with User Behavior Analytics
 
-A Zero Trust Network Access (ZTNA) based secure file vault that monitors user behavior and detects suspicious activities using Machine Learning.
+A Zero Trust Network Access (ZTNA) based secure file storage system that continuously monitors user behavior, detects suspicious activities using Machine Learning, and provides an owner dashboard for real-time security monitoring.
 
 
 ## 🚀 Features
@@ -15,28 +15,40 @@ A Zero Trust Network Access (ZTNA) based secure file vault that monitors user be
 - ✅ Admin Dashboard
 
 
-## 🛠 Technologies Used
+## 🛠 Tech Stack
 
-| Backend | Frontend | Database | AI |
-|---------|----------|----------|----|
-| Python | HTML | SQLite | Machine Learning |
-| Flask | CSS | | Scikit-learn |
-| | JavaScript | | |
+| Category | Technologies |
+|----------|--------------|
+| Backend | Python, Flask |
+| Frontend | HTML, CSS, JavaScript |
+| Database | SQLite |
+| Machine Learning | Scikit-learn |
 
 
+## 🔄 System Workflow
+
+1. User logs into the system.
+2. Files are securely uploaded to the server.
+3. Every user action is monitored.
+4. Device and login information are recorded.
+5. Machine Learning analyzes user behavior.
+6. Risk score is generated.
+7. Owner dashboard displays analytics and suspicious activities.
+
+ 
 ## 📸 Screenshots
 
 ### Login Page
-(Add image)
+(image)
 
 ### User Dashboard
-(Add image)
+(image)
 
 ### Owner Dashboard
-(Add image)
+(image)
 
 ### User Behavior Analytics
-(Add image)
+(image)
 
 
 ## 📁 Project Structure
@@ -59,6 +71,22 @@ ZTNA-SecureVault/
 To implement a Zero Trust based secure file storage system that continuously monitors user activities and identifies suspicious behavior using Machine Learning.
 
 
+## 🚀 Future Enhancements
+
+- Email alerts for suspicious logins
+- Multi-Factor Authentication (MFA)
+- Cloud storage integration
+- Real-time anomaly detection
+- Mobile responsive dashboard
+
+
+## 📄 License
+
+This project is developed for educational and research purposes.
+
+
 ## 👨‍💻 Author
 
 **Thirupathi Balaji S**
+
+Final Year B.E. Computer Science and Engineering
