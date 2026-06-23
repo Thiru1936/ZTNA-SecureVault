@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZTNA — Owner Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="dash-page">
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="nav-left">
+    <div class="nav-logo">
+      <svg viewBox="0 0 32 32" fill="none" width="26">
+        <path d="M16 3L5 8V16C5 22.1 9.9 27.7 16 29.3C22.1 27.7 27 22.1 27 16V8L16 3Z" stroke="#00f5d4" stroke-width="1.8" fill="rgba(0,245,212,0.05)"/>
+        <path d="M11 16L14.5 19.5L21 13" stroke="#00f5d4" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      ZTNA <strong>SecureVault</strong>
+    </div>
+    <span class="nav-tag owner-tag">OWNER VIEW</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user">👑 {{ owner }}</span>
+    <a href="/logout" class="btn-nav-logout">Logout</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="owner-layout">
+
+  <!-- Summary Cards -->
+  <section class="summary-row">
+    <div class="sum-card">
+      <div class="sum-icon blue">👥</div>
+      <div><div class="sum-val" id="sumUsers">—</div><div class="sum-label">Total Users</div></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-icon green">🟢</div>
+      <div><div class="sum-val" id="sumOnline">—</div><div class="sum-label">Online Now</div></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-icon red">⚠️</div>
+      <div><div class="sum-val" id="sumThreats">—</div><div class="sum-label">Threats Detected</div></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-icon cyan">📁</div>
+      <div><div class="sum-val" id="sumFiles">—</div><div class="sum-label">Total Files</div></div>
+    </div>
+  </section>
+
+  <!-- User Behavior Table -->
+  <section class="owner-card">
+    <div class="card-hdr">
+      <h2>👥 User Behavior Monitor</h2>
+      <p>Real-time behavioral analysis of all employees</p>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="userTable">
+        <thead>
+          <tr>
+            <th>User</th><th>Dept</th><th>Role</th><th>Status</th>
+            <th>Uploads</th><th>Downloads</th><th>Data (MB)</th>
+            <th>Failed Logins</th><th>Risk Score</th><th>Risk Level</th><th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="userTbody">
+          <tr><td colspan="11" class="empty-row">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="two-col">
+
+    <!-- Recent File Activity -->
+    <section class="owner-card">
+      <div class="card-hdr">
+        <h2>📁 Recent File Activity</h2>
+        <p>Files uploaded by employees</p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>File</th><th>Uploaded By</th><th>Dept</th><th>Size</th><th>Date</th></tr>
+          </thead>
+          <tbody id="fileTbody">
+            <tr><td colspan="5" class="empty-row">No files yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Audit Log -->
+    <section class="owner-card">
+      <div class="card-hdr">
+        <h2>🔍 Security Audit Log</h2>
+        <p>All system events in real-time</p>
+        <button class="btn-sm" onclick="loadData()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap audit-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Time</th><th>User</th><th>Event</th><th>Risk</th></tr>
+          </thead>
+          <tbody id="auditTbody">
+            <tr><td colspan="4" class="empty-row">No events yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+async function loadData() {
+  const res  = await fetch("/api/owner/stats");
+  const data = await res.json();
+
+  // Summary
+  document.getElementById("sumUsers").textContent   = data.summary.total_users;
+  document.getElementById("sumOnline").textContent  = data.summary.online;
+  document.getElementById("sumThreats").textContent = data.summary.threats;
+  document.getElementById("sumFiles").textContent   = data.summary.total_files;
+
+  // User table
+  const ub = document.getElementById("userTbody");
+  if (!data.users.length) {
+    ub.innerHTML = '<tr><td colspan="11" class="empty-row">No users</td></tr>';
+  } else {
+    ub.innerHTML = data.users.map(u => `
+      <tr class="${u.risk_level === 'CRITICAL' ? 'row-critical' : u.risk_level === 'HIGH' ? 'row-high' : ''}">
+        <td><strong>${u.username}</strong></td>
+        <td>${u.dept}</td>
+        <td>${u.role}</td>
+        <td><span class="status-dot ${u.status === 'Online' ? 'online' : 'offline'}"></span>${u.status}</td>
+        <td>${u.file_uploads}</td>
+        <td>${u.file_downloads}</td>
+        <td>${u.data_transferred_mb.toFixed(1)}</td>
+        <td>${u.failed_logins}</td>
+        <td><span class="score-val">${u.risk_score.toFixed(0)}</span>/100</td>
+        <td><span class="risk-tag ${u.risk_level.toLowerCase()}">${u.risk_level}</span></td>
+        <td class="mono">${u.last_seen}</td>
+      </tr>`).join("");
+  }
+
+  // File table
+  const fb = document.getElementById("fileTbody");
+  if (!data.files.length) {
+    fb.innerHTML = '<tr><td colspan="5" class="empty-row">No files uploaded yet</td></tr>';
+  } else {
+    fb.innerHTML = data.files.map(f => `
+      <tr>
+        <td>📄 ${f.name}</td>
+        <td>${f.uploader}</td>
+        <td>${f.dept}</td>
+        <td>${f.size_mb} MB</td>
+        <td class="mono">${f.uploaded_at}</td>
+      </tr>`).join("");
+  }
+
+  // Audit log
+  const ab = document.getElementById("auditTbody");
+  if (!data.audit.length) {
+    ab.innerHTML = '<tr><td colspan="4" class="empty-row">No events yet</td></tr>';
+  } else {
+    ab.innerHTML = data.audit.map(l => `
+      <tr>
+        <td class="mono">${l.time}</td>
+        <td>${l.user}</td>
+        <td>${l.event}</td>
+        <td><span class="risk-tag ${l.risk.toLowerCase()}">${l.risk}</span></td>
+      </tr>`).join("");
+  }
+}
+
+loadData();
+setInterval(loadData, 5000); // auto-refresh every 5 seconds
+</script>
+</body>
+</html>

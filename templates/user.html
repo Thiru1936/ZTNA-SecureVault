@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZTNA — My Workspace</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="dash-page">
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="nav-left">
+    <div class="nav-logo">
+      <svg viewBox="0 0 32 32" fill="none" width="26">
+        <path d="M16 3L5 8V16C5 22.1 9.9 27.7 16 29.3C22.1 27.7 27 22.1 27 16V8L16 3Z" stroke="#00f5d4" stroke-width="1.8" fill="rgba(0,245,212,0.05)"/>
+        <path d="M11 16L14.5 19.5L21 13" stroke="#00f5d4" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      ZTNA <strong>SecureVault</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-avatar">{{ user[0].upper() }}</span>
+      <div>
+        <div class="nav-uname">{{ user }}</div>
+        <div class="nav-role">{{ role }} · {{ dept }}</div>
+      </div>
+    </div>
+    <a href="/logout" class="btn-nav-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="user-layout">
+
+  <!-- LEFT: My Status -->
+  <aside class="user-sidebar">
+
+    <div class="sidebar-card">
+      <h3>My Trust Score</h3>
+      <div class="mini-gauge-wrap">
+        <div class="mini-score" id="myScore">0</div>
+        <div class="mini-label">/100</div>
+        <div id="myRiskBadge" class="risk-tag low" style="margin-top:8px">LOW RISK</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>My Activity</h3>
+      <div class="stat-list">
+        <div class="stat-row"><span>📤 Uploads</span><strong id="myUploads">0</strong></div>
+        <div class="stat-row"><span>📥 Downloads</span><strong id="myDownloads">0</strong></div>
+        <div class="stat-row"><span>🗑 Deletes</span><strong id="myDeletes">0</strong></div>
+        <div class="stat-row"><span>📦 Data Used</span><strong id="myData">0 MB</strong></div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>My Recent Events</h3>
+      <ul id="myLogs" class="mini-log">
+        <li class="ml-item dim">No events yet</li>
+      </ul>
+    </div>
+
+  </aside>
+
+  <!-- MAIN: File Manager -->
+  <main class="user-main">
+
+    <!-- Upload -->
+    <section class="user-card">
+      <div class="card-hdr">
+        <h2>📤 Upload File</h2>
+        <p>Share company files securely. Max 10 MB. Allowed: pdf, docx, xlsx, txt, png, jpg, pptx, csv</p>
+      </div>
+      <div class="upload-area" id="uploadArea"
+           ondragover="event.preventDefault(); this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <div class="upload-icon">📁</div>
+        <p>Drag & drop file here or</p>
+        <label class="btn-pick">
+          Browse File
+          <input type="file" id="fileInput" style="display:none" onchange="uploadFile(this.files[0])"/>
+        </label>
+        <p id="uploadStatus" class="upload-status"></p>
+      </div>
+    </section>
+
+    <!-- File List -->
+    <section class="user-card">
+      <div class="card-hdr" style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2>📂 Company Files</h2>
+          <p>All files uploaded by your team</p>
+        </div>
+        <button class="btn-sm" onclick="loadFiles()">↻ Refresh</button>
+      </div>
+
+      <div id="fileGrid" class="file-grid">
+        <div class="empty-files">Loading files…</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const ME = "{{ user }}";
+
+// ── Load stats ──────────────────────────────────────────────
+async function loadStats() {
+  const res  = await fetch("/api/my_stats");
+  const data = await res.json();
+  const s    = data.stats;
+
+  document.getElementById("myScore").textContent    = Math.round(s.risk_score);
+  document.getElementById("myUploads").textContent  = s.file_uploads;
+  document.getElementById("myDownloads").textContent= s.file_downloads;
+  document.getElementById("myDeletes").textContent  = s.file_deletes;
+  document.getElementById("myData").textContent     = s.data_transferred_mb.toFixed(1) + " MB";
+
+  const badge = document.getElementById("myRiskBadge");
+  badge.textContent = s.risk_level + " RISK";
+  badge.className   = "risk-tag " + s.risk_level.toLowerCase();
+
+  const logEl = document.getElementById("myLogs");
+  if (data.my_logs.length) {
+    logEl.innerHTML = data.my_logs.map(l =>
+      `<li class="ml-item"><span class="risk-tag ${l.risk.toLowerCase()} sm">${l.risk}</span> ${l.event} <span class="mono">${l.time}</span></li>`
+    ).join("");
+  }
+}
+
+// ── Load files ──────────────────────────────────────────────
+async function loadFiles() {
+  const res  = await fetch("/api/files");
+  const data = await res.json();
+  const grid = document.getElementById("fileGrid");
+
+  if (!data.files.length) {
+    grid.innerHTML = '<div class="empty-files">No files uploaded yet. Be the first!</div>';
+    return;
+  }
+
+  const iconMap = {
+    pdf:"📕", docx:"📘", xlsx:"📗", pptx:"📙",
+    txt:"📄", png:"🖼️", jpg:"🖼️", csv:"📊"
+  };
+
+  grid.innerHTML = data.files.map(f => {
+    const ext  = f.name.split(".").pop().toLowerCase();
+    const icon = iconMap[ext] || "📄";
+    const mine = f.uploader === ME;
+    return `
+      <div class="file-card">
+        <div class="file-icon">${icon}</div>
+        <div class="file-info">
+          <div class="file-name" title="${f.name}">${f.name}</div>
+          <div class="file-meta">by <strong>${f.uploader}</strong> · ${f.dept}</div>
+          <div class="file-meta">${f.size_mb} MB · ${f.uploaded_at}</div>
+        </div>
+        <div class="file-actions">
+          <button class="btn-dl" onclick="downloadFile(${f.id}, '${f.name}')">⬇ Download</button>
+          ${mine ? `<button class="btn-del" onclick="deleteFile(${f.id})">🗑 Delete</button>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ── Upload ──────────────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("uploadArea").classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+}
+
+async function uploadFile(file) {
+  if (!file) return;
+  const status = document.getElementById("uploadStatus");
+  status.textContent = "⏳ Uploading…";
+  status.className   = "upload-status";
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  const res  = await fetch("/api/upload", { method: "POST", body: fd });
+  const data = await res.json();
+
+  if (data.success) {
+    status.textContent = `✅ Uploaded! Risk level: ${data.risk} (${data.score}/100)`;
+    status.className   = "upload-status ok";
+    document.getElementById("fileInput").value = "";
+    loadFiles();
+    loadStats();
+    showToast(`File uploaded. Risk: ${data.risk}`, data.risk === "LOW" ? "ok" : "warn");
+  } else {
+    status.textContent = "❌ " + (data.error || "Upload failed.");
+    status.className   = "upload-status err";
+  }
+}
+
+// ── Download ─────────────────────────────────────────────────
+function downloadFile(id, name) {
+  window.location.href = `/api/download/${id}`;
+  setTimeout(() => { loadStats(); loadFiles(); }, 1000);
+  showToast(`Downloading ${name}…`, "ok");
+}
+
+// ── Delete ───────────────────────────────────────────────────
+async function deleteFile(id) {
+  if (!confirm("Delete this file? This cannot be undone.")) return;
+  const res  = await fetch(`/api/delete/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  if (data.success) {
+    showToast("File deleted.", "ok");
+    loadFiles(); loadStats();
+  } else {
+    showToast(data.error || "Delete failed.", "err");
+  }
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className   = `toast ${type}`;
+  setTimeout(() => t.className = "toast hidden", 3000);
+}
+
+// Init
+loadFiles();
+loadStats();
+setInterval(() => { loadStats(); }, 8000);
+</script>
+</body>
+</html>
