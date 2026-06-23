@@ -1,21 +1,63 @@
-# ZTNA Secure Vault
+# 🔐 ZTNA Secure Vault
 
-## Features
-✔ User Login
-✔ Role-Based Access Control
-✔ File Upload
-✔ File Download
-✔ User Behavior Monitoring
-✔ Device Usage Tracking
-✔ Unauthorized Access Detection
-✔ Admin Dashboard
-✔ Machine Learning Risk Prediction
+A Zero Trust Network Access (ZTNA) based secure file vault that monitors user behavior and detects suspicious activities using Machine Learning.
 
-## Technologies
-Python
-Flask
-HTML
-CSS
-JavaScript
-SQLite
-Machine Learning
+
+## 🚀 Features
+
+- ✅ Secure User Authentication
+- ✅ Role-Based Access Control (Owner / User)
+- ✅ Secure File Upload & Download
+- ✅ User Behavior Monitoring
+- ✅ Device Usage Tracking
+- ✅ Unauthorized Access Detection
+- ✅ Machine Learning Risk Prediction
+- ✅ Admin Dashboard
+
+
+## 🛠 Technologies Used
+
+| Backend | Frontend | Database | AI |
+|---------|----------|----------|----|
+| Python | HTML | SQLite | Machine Learning |
+| Flask | CSS | | Scikit-learn |
+| | JavaScript | | |
+
+
+## 📸 Screenshots
+
+### Login Page
+(Add image)
+
+### User Dashboard
+(Add image)
+
+### Owner Dashboard
+(Add image)
+
+### User Behavior Analytics
+(Add image)
+
+
+## 📂 Project Structure
+
+ZTNA-SecureVault/
+│
+├── static/
+├── templates/
+├── app.py
+├── train_model.py
+├── dataset.csv
+├── requirements.txt
+└── README.md
+
+
+## 🎯 Objective
+
+To implement a Zero Trust based secure file storage system that continuously monitors user activities and identifies suspicious behavior using Machine Learning.
+
+
+## 👨‍💻 Author
+
+**Thirupathi Balaji S**
+Final Year B.E CSE Student
